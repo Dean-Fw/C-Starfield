@@ -1,5 +1,6 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_surface.h>
+#include <endian.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -10,7 +11,6 @@
 
 #define MAX_VELOCITY 1
 #define MIN_SIZE 2
-#define MAX_SIZE 5
 #define MAX_STARS 1000
 
 #define WHITE 0xedcee4
@@ -36,8 +36,8 @@ void recreateStar(struct Star *star) {
   star->velocityX = (double)rand() / RAND_MAX * 2 * MAX_VELOCITY - MAX_VELOCITY;
   star->velocityY = (double)rand() / RAND_MAX * 2 * MAX_VELOCITY - MAX_VELOCITY;
 
-  star->size = MAX_SIZE;
-  star->size = MAX_SIZE;
+  star->size = MIN_SIZE;
+  star->size = MIN_SIZE;
 }
 
 void moveStars(SDL_Surface *pSurface, struct Star *star) {
@@ -52,13 +52,21 @@ void moveStars(SDL_Surface *pSurface, struct Star *star) {
 
   star->x += star->velocityX;
   star->y += star->velocityY;
-  star->size += sqrt(pow(star->velocityX, 2) + pow(star->velocityY, 2)) / 75;
+
+  if (star->size +
+          sqrt(pow(star->velocityX, 2) + pow(star->velocityY, 2)) / 75 >
+      MIN_SIZE) {
+    star->size += sqrt(pow(star->velocityX, 2) + pow(star->velocityY, 2)) / 75;
+  } else {
+    star->size = MIN_SIZE;
+  }
 
   SDL_Rect newStar = {star->x, star->y, star->size, star->size};
   SDL_FillRect(pSurface, &newStar, WHITE);
 }
 
 int main() {
+  // Create SDL Structs
   if (SDL_Init(SDL_INIT_VIDEO)) {
     fprintf(stderr, "SDL Init Failed: %s\n", SDL_GetError());
   }
@@ -76,6 +84,7 @@ int main() {
     fprintf(stderr, "Failed to get window surface");
   }
 
+  // Create Stars
   struct Star stars[MAX_STARS];
 
   for (int i = 0; i < MAX_STARS; i++) {
@@ -85,6 +94,7 @@ int main() {
         (double)rand() / RAND_MAX * 2 * MAX_VELOCITY - MAX_VELOCITY};
   }
 
+  // Run animation
   bool running = true;
   SDL_Event event;
 
