@@ -1,5 +1,6 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_surface.h>
+#include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,7 +13,7 @@
 #define MAX_SIZE 5
 #define MAX_STARS 1000
 
-#define WHITE 0xffffff
+#define WHITE 0xedcee4
 #define BLACK 0x000000
 
 struct Star {
@@ -20,6 +21,7 @@ struct Star {
   double y;
   double velocityX;
   double velocityY;
+  double size;
 };
 
 void clearScreen(SDL_Surface *pSurface) {
@@ -33,6 +35,9 @@ void recreateStar(struct Star *star) {
 
   star->velocityX = (double)rand() / RAND_MAX * 2 * MAX_VELOCITY - MAX_VELOCITY;
   star->velocityY = (double)rand() / RAND_MAX * 2 * MAX_VELOCITY - MAX_VELOCITY;
+
+  star->size = MAX_SIZE;
+  star->size = MAX_SIZE;
 }
 
 void moveStars(SDL_Surface *pSurface, struct Star *star) {
@@ -47,8 +52,9 @@ void moveStars(SDL_Surface *pSurface, struct Star *star) {
 
   star->x += star->velocityX;
   star->y += star->velocityY;
+  star->size += sqrt(pow(star->velocityX, 2) + pow(star->velocityY, 2)) / 75;
 
-  SDL_Rect newStar = {star->x, star->y, MIN_SIZE, MIN_SIZE};
+  SDL_Rect newStar = {star->x, star->y, star->size, star->size};
   SDL_FillRect(pSurface, &newStar, WHITE);
 }
 
